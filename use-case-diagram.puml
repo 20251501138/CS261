@@ -1,0 +1,86 @@
+@startuml use-case-diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #EAF2FB
+  BorderColor #1A3A5C
+  FontSize 13
+}
+skinparam rectangle {
+  BorderColor #333333
+}
+skinparam arrow {
+  Color #444444
+}
+
+' ---------- Actors ----------
+actor "Candidate" as candidate
+actor "Exam Administrator\n(UPSC Official)" as admin
+actor "Payment Gateway" as payment <<external system>>
+actor "Aadhaar Verification\nSystem" as aadhaar <<external system>>
+actor "Scheduler" as sched <<time-triggered>>
+actor "Examiner /\nEvaluator" as examiner
+actor "Notification System" as notif <<external system>>
+actor "Interview Board\nMember" as board
+
+' ---------- System boundary ----------
+rectangle "UPSC Civil Services Examination & Merit Management System" {
+  usecase "Register for Examination"      as UC1
+  usecase "Submit Application Form"       as UC2
+  usecase "Make Payment"                  as UC3
+  usecase "Pay via Card"                  as UC3a
+  usecase "Pay via UPI / Net-Banking"     as UC3b
+  usecase "Verify Candidate Documents"    as UC4
+  usecase "Generate Admit Card"           as UC5
+  usecase "Take Examination"              as UC6
+  usecase "Evaluate Answer Sheets"        as UC7
+  usecase "Re-evaluate Answer Sheet"      as UC8
+  usecase "Generate Merit List"           as UC9
+  usecase "Schedule Interview"            as UC10
+  usecase "Conduct Interview"             as UC11
+  usecase "Publish Final Result"          as UC12
+  usecase "Send Notification"             as UC13
+}
+
+' ---------- Primary actor associations ----------
+candidate --> UC1
+candidate --> UC2
+candidate --> UC6
+
+admin --> UC4
+admin --> UC5
+admin --> UC9
+admin --> UC10
+admin --> UC12
+
+examiner --> UC7
+examiner --> UC8
+
+board --> UC11
+
+' ---------- Secondary / external / time-triggered actor associations ----------
+payment --> UC3
+aadhaar --> UC4
+notif --> UC13
+sched --> UC5
+
+' ---------- <<include>> relationships ----------
+UC2 ..> UC3  : <<include>>
+UC12 ..> UC13 : <<include>>
+
+' ---------- <<extend>> relationship with guard condition ----------
+UC8 ..> UC7 : "<<extend>>\n[candidate has requested\nre-evaluation within 15 days\nof result declaration]"
+
+' ---------- Generalization ----------
+UC3a --|> UC3
+UC3b --|> UC3
+
+note bottom of UC3
+  "Make Payment" is an abstract base use case;
+  "Pay via Card" and "Pay via UPI / Net-Banking"
+  are specializations (generalization relationship).
+end note
+
+@enduml
+
